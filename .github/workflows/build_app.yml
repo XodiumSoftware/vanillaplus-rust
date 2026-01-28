@@ -14,10 +14,16 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
+env:
+  APP_NAME: illyriaplus
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Build (\${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     environment:
       name: "${{ github.ref_name }}"
       url: "${{ steps.upload_artifact.outputs.artifact-url }}"
@@ -59,13 +65,17 @@ jobs:
         name: Upload Artifact
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: illyriaplus
-          path: target/release/illyriaplus
+          name: ${{ env.APP_NAME }}-${{ matrix.os }}
+          path: target/release/${{ env.APP_NAME }}
           retention-days: 7
 
   test:
+    name: Test (\${{ matrix.os }})
     needs: [ build ]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     environment:
       name: "${{ github.ref_name }}"
     steps:
@@ -88,6 +98,7 @@ jobs:
         shell: bash
 
   release:
+    name: Release
     needs: [ build, test ]
     runs-on: ubuntu-latest
     environment:
@@ -98,11 +109,11 @@ jobs:
         name: Download Artefact
         uses: actions/download-artifact@v7.0.0
         with:
-          name: illyriaplus
+          name: ${{ env.APP_NAME }}
 
       - id: verify_binary
         name: Verify Binary
-        run: ./illyriaplus --version
+        run: ./${{ env.APP_NAME }} --version
         shell: bash
 
       - id: create_release
@@ -115,4 +126,7 @@ jobs:
           generate_release_notes: true
           prerelease: ${{ contains(github.event.head_commit.message, '.pre') }}
           tag_name: v${{ needs.build.outputs.VERSION }}
-          files: illyriaplus
+          files: |
+            ${{ env.APP_NAME }}-ubuntu-latest/${{ env.APP_NAME }}
+            ${{ env.APP_NAME }}-macos-latest/${{ env.APP_NAME }}
+            ${{ env.APP_NAME }}-windows-latest/${{ env.APP_NAME }}.exe
