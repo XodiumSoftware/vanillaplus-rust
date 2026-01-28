@@ -2,44 +2,117 @@ name: Xodium CI/CD - Build Application
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
+    paths: [ "src/**" ]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  pull-requests: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: "${{ github.ref_name }}"
+      url: "${{ steps.upload_artifact.outputs.artifact-url }}"
+    outputs: { VERSION: "${{ steps.get_version.outputs.VERSION }}" }
     steps:
-      #      TODO: adjust for rust app.
       - id: checkout
         name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.1
 
-      - id: setup-java
-        name: Setup Java
-        uses: actions/setup-java@v5
+      - id: cache_dependencies
+        name: Cache dependencies
+        uses: actions/cache@v5.0.2
         with:
-          java-version: 21
-          distribution: temurin
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - id: setup-gradle
-        name: Setup Gradle
-        uses: gradle/actions/setup-gradle@576fcbecfed70890e466eeffd7c78d93b30b0472
-
-      - id: build-gradle
-        name: Build with Gradle
-        run: ./gradlew shadowJar
-
-      - id: upload-artifact
-        name: Upload Build Artifact
-        if: ${{ success() }}
-        uses: actions/upload-artifact@v6
+      - id: setup_rust
+        name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@806aa7ddf5d59f36fb30048411f6bde29364a53f
         with:
-          path: build/libs/*.jar
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - id: build_artifact
+        name: Build Artefact
+        run: cargo build --release --locked --timings
+        shell: bash
+
+      - id: get_version
+        name: Get Version
+        run: |
+          echo "VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - id: upload_artifact
+        name: Upload Artifact
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: illyriaplus
+          path: target/release/illyriaplus
+          retention-days: 7
+
+  test:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    environment:
+      name: "${{ github.ref_name }}"
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v6.0.1
+
+      - id: setup_rust
+        name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@806aa7ddf5d59f36fb30048411f6bde29364a53f
+        with:
+          toolchain: stable
+
+      - id: run_tests
+        name: Run Tests
+        run: |
+          cargo test --all --no-fail-fast
+          cargo clippy --all-targets --all-features -- -D warnings
+          cargo fmt --all -- --check
+        shell: bash
+
+  release:
+    needs: [ build, test ]
+    runs-on: ubuntu-latest
+    environment:
+      name: "${{ github.ref_name }}"
+      url: "${{ steps.create_release.outputs.url }}"
+    steps:
+      - id: download_artifact
+        name: Download Artefact
+        uses: actions/download-artifact@v7.0.0
+        with:
+          name: illyriaplus
+
+      - id: verify_binary
+        name: Verify Binary
+        run: ./illyriaplus --version
+        shell: bash
+
+      - id: create_release
+        name: Create Release
+        uses: softprops/action-gh-release@78237c54eb15310cb292a15480c4be010be47aeb
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          draft: ${{ contains(github.event.head_commit.message, '.draft') }}
+          generate_release_notes: true
+          prerelease: ${{ contains(github.event.head_commit.message, '.pre') }}
+          tag_name: v${{ needs.build.outputs.VERSION }}
+          files: illyriaplus
