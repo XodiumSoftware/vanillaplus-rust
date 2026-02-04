@@ -52,7 +52,7 @@ jobs:
 
       - id: build_artifact
         name: Build Artefact
-        run: cargo build --release --locked --timings
+        run: cargo build --release --timings
         shell: bash
 
       - id: get_version
