@@ -126,4 +126,4 @@ jobs:
           generate_release_notes: true
           prerelease: ${{ contains(github.event.head_commit.message, '.pre') }}
           tag_name: v${{ needs.build.outputs.VERSION }}
-          files: `${{ env.APP_NAME }}-*/${{ env.APP_NAME }}`
+          files: ${{ env.APP_NAME }}-*/${{ env.APP_NAME }}
