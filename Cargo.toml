@@ -8,9 +8,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pumpkin = { git = "https://github.com/Pumpkin-MC/Pumpkin.git", branch = "master" }
+pumpkin-util = { git = "https://github.com/Pumpkin-MC/Pumpkin.git", branch = "master", package = "pumpkin-util" }
 pumpkin-api-macros = { git = "https://github.com/Pumpkin-MC/Pumpkin.git", branch = "master" }
-
-tokio = { version = "1.49", features = ["full"] }
 
 [profile.release]
 lto = true

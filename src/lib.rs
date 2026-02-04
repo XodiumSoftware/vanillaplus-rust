@@ -1,5 +1,23 @@
-use pumpkin_api_macros::plugin_impl;
+use pumpkin_api_macros::{plugin_impl, plugin_method};
 
+mod modules {
+    pub mod player;
+}
+
+#[plugin_method]
+async fn on_load(&mut self, server: Arc<Context>) -> Result<(), String> {
+    server.init_log();
+
+    log::info!("IllyriaPlus loaded!");
+
+    server
+        .register_event(Arc::new(PlayerModule), EventPriority::Lowest, true)
+        .await;
+
+    Ok(())
+}
+
+/// IllyriaPlus plugin implementation.
 #[plugin_impl]
 pub struct IllyriaPlus {}
 
