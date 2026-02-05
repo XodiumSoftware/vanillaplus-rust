@@ -1,3 +1,4 @@
+use crate::modules::module::Module;
 use pumpkin::plugin::player::player_join::PlayerJoinEvent;
 use pumpkin::plugin::player::player_leave::PlayerLeaveEvent;
 use pumpkin::plugin::{BoxFuture, EventHandler};
@@ -10,7 +11,13 @@ use std::sync::Arc;
 
 /// Represents a module handling player mechanics within the system.
 pub struct PlayerModule {
-    pub config: PlayerModuleConfig,
+    config: Config,
+}
+
+impl Module for PlayerModule {
+    fn enabled(&self) -> bool {
+        self.config.enabled
+    }
 }
 
 #[with_runtime(global)]
@@ -20,6 +27,10 @@ impl EventHandler<PlayerJoinEvent> for PlayerModule {
         _server: &Arc<Server>,
         event: &mut PlayerJoinEvent,
     ) -> BoxFuture<'_, ()> {
+        if !(self.enabled()) {
+            return;
+        }
+
         let msg = self
             .config
             .join_msg
@@ -38,6 +49,10 @@ impl EventHandler<PlayerLeaveEvent> for PlayerModule {
         _server: &Arc<Server>,
         event: &mut PlayerLeaveEvent,
     ) -> BoxFuture<'_, ()> {
+        if !(self.enabled()) {
+            return;
+        }
+
         let msg = self
             .config
             .leave_msg
@@ -51,14 +66,16 @@ impl EventHandler<PlayerLeaveEvent> for PlayerModule {
 
 /// Represents the config of the module.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PlayerModuleConfig {
+pub struct Config {
+    pub enabled: bool,
     pub join_msg: String,
     pub leave_msg: String,
 }
 
-impl Default for PlayerModuleConfig {
+impl Default for Config {
     fn default() -> Self {
         Self {
+            enabled: true,
             join_msg: "Welcome, {player}!".to_string(),
             leave_msg: "Goodbye, {player}!".to_string(),
         }

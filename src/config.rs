@@ -1,4 +1,4 @@
-use crate::modules::player::PlayerModuleConfig;
+use crate::modules::player::Config;
 use pumpkin::plugin::Context;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
@@ -32,7 +32,7 @@ use std::{fs, io};
 /// ```
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ConfigManager {
-    pub player_module: PlayerModuleConfig,
+    pub player_module: Config,
 }
 
 impl ConfigManager {
