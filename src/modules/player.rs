@@ -27,7 +27,7 @@ impl EventHandler<PlayerJoinEvent> for PlayerModule {
         _server: &Arc<Server>,
         event: &mut PlayerJoinEvent,
     ) -> BoxFuture<'_, ()> {
-        if !(self.enabled()) {
+        if !self.enabled() {
             return;
         }
 
@@ -49,7 +49,7 @@ impl EventHandler<PlayerLeaveEvent> for PlayerModule {
         _server: &Arc<Server>,
         event: &mut PlayerLeaveEvent,
     ) -> BoxFuture<'_, ()> {
-        if !(self.enabled()) {
+        if !self.enabled() {
             return;
         }
 
