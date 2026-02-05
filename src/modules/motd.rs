@@ -1,3 +1,6 @@
+#![warn(clippy::all)]
+#![forbid(unsafe_code)]
+
 use crate::modules::module::Module;
 use pumpkin::server::Server;
 use serde::{Deserialize, Serialize};

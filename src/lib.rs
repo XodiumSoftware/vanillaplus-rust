@@ -1,3 +1,6 @@
+#![warn(clippy::all)]
+#![forbid(unsafe_code)]
+
 mod config;
 
 mod modules {

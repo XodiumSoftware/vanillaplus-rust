@@ -1,3 +1,6 @@
+#![warn(clippy::all)]
+#![forbid(unsafe_code)]
+
 /// A trait representing a generic module with an `enabled` status.
 ///
 /// This trait is intended to be implemented by types that represent

@@ -1,3 +1,6 @@
+#![warn(clippy::all)]
+#![forbid(unsafe_code)]
+
 use crate::modules::module::Module;
 use pumpkin::plugin::player::player_join::PlayerJoinEvent;
 use pumpkin::plugin::player::player_leave::PlayerLeaveEvent;
