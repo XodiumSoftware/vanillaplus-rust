@@ -1,5 +1,6 @@
 use crate::module::Module;
 use pumpkin::command::tree::CommandTree;
+use pumpkin_util::permission::{Permission, PermissionDefault};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -25,6 +26,14 @@ impl Module for Locator {
         HashSet::from([CommandTree::new(
             ["locator", "lc"],
             "Allows players to personalise their locator bar",
+        )])
+    }
+
+    fn perms(&self) -> HashSet<Permission> {
+        HashSet::from([Permission::new(
+            "locator",
+            "Allows use of the locator command",
+            PermissionDefault::Allow,
         )])
     }
 }
