@@ -38,8 +38,8 @@ pub trait Module {
     /// Calls [`Module::register_events`], then registers each command from
     /// [`Module::cmds`] paired with its corresponding permission from [`Module::perms`]
     /// by index. Commands without a paired permission use an empty permission string.
-    fn register(&self, context: Context) {
-        self.events(&context);
+    fn register(&self, context: &Context) {
+        self.events(context);
         let perms: Vec<String> = self.perms().into_iter().collect();
         for (i, cmd) in self.cmds().into_iter().enumerate() {
             let perm = perms.get(i).cloned().unwrap_or_default();

@@ -2,8 +2,10 @@ use crate::modules::module::Module;
 use pumpkin_plugin_api::Server;
 use serde::{Deserialize, Serialize};
 
-/// Represents handling motd mechanics within the system.
+/// Handles MOTD (Message of the Day) mechanics.
+#[derive(Default)]
 pub struct Motd {
+    /// Configuration for this module.
     config: Config,
 }
 
@@ -14,24 +16,19 @@ impl Module for Motd {
 }
 
 impl Motd {
-    pub fn new() -> Self {
-        Self {
-            config: Config::default(),
-        }
-    }
-
     pub fn motd(&self, server: &mut Server) {
-        if !self.enabled() {
-            return;
+        if self.enabled() {
+            server.set_motd(self.config.motd.join("\n"));
         }
-        server.basic_config.motd = self.config.motd.join("\n");
     }
 }
 
-/// Represents the config of the module.
+/// Configuration for the MOTD mechanics module.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
+    /// Whether this module is active.
     pub enabled: bool,
+    /// Lines of the MOTD displayed to players on the server list.
     pub motd: Vec<String>,
 }
 

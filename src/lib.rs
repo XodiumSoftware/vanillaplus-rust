@@ -22,6 +22,7 @@ pub use modules::*;
 pub use recipes::*;
 
 use crate::module::Module;
+use crate::motd::Motd;
 use crate::player::Player;
 use pumpkin_plugin_api::{Context, PluginMetadata};
 use tracing::info;
@@ -44,7 +45,8 @@ impl IllyriaPlus {
     }
 
     fn on_load(&mut self, context: Context) -> pumpkin_plugin_api::Result<()> {
-        Player::default().register(context);
+        Motd::default().register(&context);
+        Player::default().register(&context);
         info!("IllyriaPlus loaded. NICE TO CYA!");
         Ok(())
     }
