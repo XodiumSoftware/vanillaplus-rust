@@ -1,19 +1,18 @@
 use crate::module::Module;
+use pumpkin_plugin_api::{
+    Server,
+    command::{Command, CommandError, CommandNode, CommandSender, ConsumedArgs},
+    commands::CommandHandler,
+    text::TextComponent,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use std::pin::Pin;
 
-/// Represents handling locator mechanics within the system.
+/// Handles locator bar mechanics.
+#[derive(Default)]
 pub struct Locator {
+    /// Configuration for this module.
     config: Config,
-}
-
-impl Locator {
-    pub fn new() -> Self {
-        Self {
-            config: Config::default(),
-        }
-    }
 }
 
 impl Module for Locator {
@@ -21,62 +20,41 @@ impl Module for Locator {
         self.config.enabled
     }
 
-    fn cmds(&self) -> HashSet<CommandTree> {
-        HashSet::from([CommandTree::new(
-            ["locator", "lc"],
+    fn cmds(&self) -> Vec<Command> {
+        let command = Command::new(
+            &["locator".to_string(), "lc".to_string()],
             "Allows players to personalise their locator bar",
-        )
-        .then(argument("color", SimpleArgConsumer).execute(LocatorExecutor))
-        .then(argument("hex", SimpleArgConsumer).execute(LocatorExecutor))
-        .then(literal("reset").execute(LocatorExecutor))])
+        );
+        command.then(CommandNode::literal("color").execute(LocatorExecutor));
+        command.then(CommandNode::literal("hex").execute(LocatorExecutor));
+        command.then(CommandNode::literal("reset").execute(LocatorExecutor));
+        vec![command]
     }
 
-    fn perms(&self) -> HashSet<Permission> {
-        HashSet::from([Permission::new(
-            "locator",
-            "Allows use of the locator command",
-            PermissionDefault::Allow,
-        )])
+    fn perms(&self) -> HashSet<String> {
+        HashSet::from(["vanillaplus:command.locator".to_string()])
     }
 }
 
 struct LocatorExecutor;
 
-impl CommandExecutor for LocatorExecutor {
-    fn execute<'a>(
+impl CommandHandler for LocatorExecutor {
+    fn handle(
         &self,
-        sender: &mut CommandSender,
-        _: &Server,
-        args: &ConsumedArgs<'a>,
-    ) -> Pin<Box<dyn Future<Output = Result<(), CommandError>> + Send + 'a>> {
-        Box::pin(async move {
-            let player = match sender.as_player() {
-                Some(p) => p,
-                None => {
-                    return Err(CommandFailed(TextComponent::text(
-                        "Only players can use this command",
-                    )));
-                }
-            };
-
-            // TODO: figure out the api to adjust the locator bar.
-
-            if let Some(Arg::Simple(value)) = args.get("color") {
-                let color: &str = value;
-                player;
-            }
-            if let Some(Arg::Simple(value)) = args.get("hex") {
-                let hex: &str = value;
-                player;
-            }
-            Ok(())
-        })
+        sender: CommandSender,
+        _server: Server,
+        _args: ConsumedArgs,
+    ) -> Result<i32, CommandError> {
+        // TODO: figure out the api to adjust the locator bar.
+        sender.send_message(TextComponent::text("Not yet implemented."));
+        Ok(1)
     }
 }
 
-/// Represents the config of the module.
+/// Configuration for the locator mechanics module.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
+    /// Whether this module is active.
     pub enabled: bool,
 }
 

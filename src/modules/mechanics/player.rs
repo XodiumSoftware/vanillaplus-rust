@@ -1,10 +1,9 @@
 use crate::modules::module::Module;
-
-use pumpkin_plugin_api::events::{
-    EventHandler, EventPriority, PlayerJoinEventData, PlayerLeaveEventData,
+use pumpkin_plugin_api::{
+    Context, Server,
+    events::{EventHandler, EventPriority, PlayerJoinEventData, PlayerLeaveEventData},
+    text::TextComponent,
 };
-use pumpkin_plugin_api::text::TextComponent;
-use pumpkin_plugin_api::{Context, Server};
 use serde::{Deserialize, Serialize};
 
 /// Handles player join and leave mechanics, including custom messages.
@@ -21,37 +20,52 @@ impl Module for Player {
 
     fn events(&self, context: &Context) {
         context
-            .register_event_handler(Player::default(), EventPriority::Highest, true)
-            .expect("failed to register player event handler");
+            .register_event_handler(
+                PlayerJoinHandler {
+                    join_msg: self.config.join_msg.clone(),
+                },
+                EventPriority::Highest,
+                true,
+            )
+            .expect("failed to register player join event handler");
+        context
+            .register_event_handler(
+                PlayerLeaveHandler {
+                    leave_msg: self.config.leave_msg.clone(),
+                },
+                EventPriority::Highest,
+                true,
+            )
+            .expect("failed to register player leave event handler");
     }
 }
 
-impl EventHandler<PlayerJoinEventData> for Player {
-    fn handle(&self, _server: Server, mut event: PlayerJoinEventData) -> PlayerJoinEventData {
-        if self.enabled() {
-            event.join_message = TextComponent::text(
-                self.config
-                    .join_msg
-                    .replace("{player}", &event.player.name)
-                    .as_str(),
-            )
-        }
+struct PlayerJoinHandler {
+    join_msg: String,
+}
 
+impl EventHandler<PlayerJoinEventData> for PlayerJoinHandler {
+    fn handle(&self, _server: Server, mut event: PlayerJoinEventData) -> PlayerJoinEventData {
+        event.join_message = TextComponent::text(
+            self.join_msg
+                .replace("{player}", &event.player.get_id())
+                .as_str(),
+        );
         event
     }
 }
 
-impl EventHandler<PlayerLeaveEventData> for Player {
-    fn handle(&self, _server: Server, mut event: PlayerLeaveEventData) -> PlayerLeaveEventData {
-        if self.enabled() {
-            event.leave_message = TextComponent::text(
-                self.config
-                    .leave_msg
-                    .replace("{player}", &event.player.name)
-                    .as_str(),
-            );
-        }
+struct PlayerLeaveHandler {
+    leave_msg: String,
+}
 
+impl EventHandler<PlayerLeaveEventData> for PlayerLeaveHandler {
+    fn handle(&self, _server: Server, mut event: PlayerLeaveEventData) -> PlayerLeaveEventData {
+        event.leave_message = TextComponent::text(
+            self.leave_msg
+                .replace("{player}", &event.player.get_id())
+                .as_str(),
+        );
         event
     }
 }
