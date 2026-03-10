@@ -20,50 +20,29 @@ impl Module for Player {
 
     fn events(&self, context: &Context) {
         context
-            .register_event_handler(
-                PlayerJoinHandler {
-                    join_msg: self.config.join_msg.clone(),
-                },
-                EventPriority::Highest,
-                true,
-            )
+            .register_event_handler(Player::default(), EventPriority::Highest, true)
             .expect("failed to register player join event handler");
-        context
-            .register_event_handler(
-                PlayerLeaveHandler {
-                    leave_msg: self.config.leave_msg.clone(),
-                },
-                EventPriority::Highest,
-                true,
-            )
-            .expect("failed to register player leave event handler");
     }
 }
 
-struct PlayerJoinHandler {
-    join_msg: String,
-}
-
-impl EventHandler<PlayerJoinEventData> for PlayerJoinHandler {
+impl EventHandler<PlayerJoinEventData> for Player {
     fn handle(&self, _server: Server, mut event: PlayerJoinEventData) -> PlayerJoinEventData {
         event.join_message = TextComponent::text(
-            self.join_msg
-                .replace("{player}", &event.player.get_id())
+            self.config
+                .join_msg
+                .replace("{player}", &event.player.get_name())
                 .as_str(),
         );
         event
     }
 }
 
-struct PlayerLeaveHandler {
-    leave_msg: String,
-}
-
-impl EventHandler<PlayerLeaveEventData> for PlayerLeaveHandler {
+impl EventHandler<PlayerLeaveEventData> for Player {
     fn handle(&self, _server: Server, mut event: PlayerLeaveEventData) -> PlayerLeaveEventData {
         event.leave_message = TextComponent::text(
-            self.leave_msg
-                .replace("{player}", &event.player.get_id())
+            self.config
+                .leave_msg
+                .replace("{player}", &event.player.get_name())
                 .as_str(),
         );
         event
