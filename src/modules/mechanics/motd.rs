@@ -1,10 +1,16 @@
 use crate::modules::module::Module;
-use pumpkin::server::Server;
+use pumpkin_plugin_api::Server;
 use serde::{Deserialize, Serialize};
 
 /// Represents handling motd mechanics within the system.
 pub struct Motd {
     config: Config,
+}
+
+impl Module for Motd {
+    fn enabled(&self) -> bool {
+        self.config.enabled
+    }
 }
 
 impl Motd {
@@ -18,14 +24,7 @@ impl Motd {
         if !self.enabled() {
             return;
         }
-
         server.basic_config.motd = self.config.motd.join("\n");
-    }
-}
-
-impl Module for Motd {
-    fn enabled(&self) -> bool {
-        self.config.enabled
     }
 }
 
@@ -41,8 +40,8 @@ impl Default for Config {
         Self {
             enabled: true,
             motd: vec![
-                "<gradient:#CB2D3E:#EF473A><b>Ultimate Private SMP</b></gradient>".to_string(),
-                "<gradient:#FFE259:#FFA751><b>➤ WELCOME BACK LADS!</b></gradient>".to_string(),
+                "<gradient:#CB2D3E:#EF473A><b>Ultimate Private SMP</b></gradient>".into(),
+                "<gradient:#FFE259:#FFA751><b>➤ WELCOME BACK LADS!</b></gradient>".into(),
             ],
         }
     }

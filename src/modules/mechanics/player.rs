@@ -1,18 +1,28 @@
 use crate::modules::module::Module;
 
-use pumpkin_plugin_api::Server;
-use pumpkin_plugin_api::events::{EventHandler, PlayerJoinEventData, PlayerLeaveEventData};
+use pumpkin_plugin_api::events::{
+    EventHandler, EventPriority, PlayerJoinEventData, PlayerLeaveEventData,
+};
 use pumpkin_plugin_api::text::TextComponent;
+use pumpkin_plugin_api::{Context, Server};
 use serde::{Deserialize, Serialize};
 
+/// Handles player join and leave mechanics, including custom messages.
 #[derive(Default)]
 pub struct Player {
+    /// Configuration for this module.
     config: Config,
 }
 
 impl Module for Player {
     fn enabled(&self) -> bool {
         self.config.enabled
+    }
+
+    fn events(&self, context: &Context) {
+        context
+            .register_event_handler(Player::default(), EventPriority::Highest, true)
+            .expect("failed to register player event handler");
     }
 }
 
@@ -46,11 +56,14 @@ impl EventHandler<PlayerLeaveEventData> for Player {
     }
 }
 
-/// Represents the config of the module.
+/// Configuration for the player mechanics module.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
+    /// Whether this module is active.
     pub enabled: bool,
+    /// Message broadcast when a player joins. Use `{player}` as a placeholder for the player identifier.
     pub join_msg: String,
+    /// Message broadcast when a player leaves. Use `{player}` as a placeholder for the player identifier.
     pub leave_msg: String,
 }
 

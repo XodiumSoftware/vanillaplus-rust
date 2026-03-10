@@ -21,8 +21,8 @@ pub use mechanics::*;
 pub use modules::*;
 pub use recipes::*;
 
+use crate::module::Module;
 use crate::player::Player;
-use pumpkin_plugin_api::events::EventPriority;
 use pumpkin_plugin_api::{Context, PluginMetadata};
 use tracing::info;
 
@@ -36,15 +36,15 @@ impl IllyriaPlus {
 
     fn metadata(&self) -> PluginMetadata {
         PluginMetadata {
-            name: "IllyriaPlus".into(),
+            name: "Vanilla+".into(),
             version: env!("CARGO_PKG_VERSION").into(),
             authors: vec!["Xodium".into()],
-            description: " Minecraft plugin that enhances the base gameplay in Rust".into(),
+            description: "Minecraft plugin that enhances the base gameplay in Rust".into(),
         }
     }
 
     fn on_load(&mut self, context: Context) -> pumpkin_plugin_api::Result<()> {
-        context.register_event_handler(Player::default(), EventPriority::Highest, true)?;
+        Player::default().register(context);
         info!("IllyriaPlus loaded. NICE TO CYA!");
         Ok(())
     }

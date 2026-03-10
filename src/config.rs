@@ -1,35 +1,23 @@
 use crate::player::Config;
-use pumpkin::plugin::Context;
+use pumpkin_plugin_api::Context;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::{fs, io};
 
-/// The `ConfigManager` struct is responsible for managing configuration settings
-/// related to the application's player module. It acts as a container for
-/// the `PlayerModuleConfig` configuration.
-///
-/// # Attributes
-/// * `player_module` - A public field of type `PlayerModuleConfig` that holds
-///   the configuration details for the player module.
+/// Manages plugin configuration, loading from and saving to disk.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ConfigManager {
+    /// Configuration for the player mechanics module.
     pub player_module: Config,
 }
 
 impl ConfigManager {
-    /// Creates a new instance of the configuration.
+    /// Loads the configuration from disk, or writes and returns the default if not found.
     ///
-    /// # Arguments
-    /// * `ctx` - An `Arc<Context>` instance, which provides the necessary context
-    ///           to determine the file path for the configuration.
-    ///
-    /// # Returns
-    /// * `Ok(Self)` - If the configuration is successfully loaded or created as default.
-    /// * `Err(io::Error)` - If an I/O error occurs during the loading or saving process,
-    ///                      other than a `NotFound` error.
-    pub fn new(ctx: Arc<Context>) -> Result<Self, io::Error> {
-        let path = Self::path(ctx.clone());
+    /// # Errors
+    /// Returns an [`io::Error`] if an I/O or deserialization error occurs.
+    pub fn new(context: Context) -> Result<Self, io::Error> {
+        let path = Self::path(context);
 
         match Self::load(&path) {
             Ok(config) => Ok(config),
@@ -42,15 +30,16 @@ impl ConfigManager {
         }
     }
 
-    /// Generates the file path for the configuration file.
-    ///
-    /// # Arguments
-    /// * `ctx` - An `Arc<Context>` object that provides access to the application's
-    ///           data folder through its `get_data_folder` method.
-    fn path(ctx: Arc<Context>) -> PathBuf {
-        ctx.get_data_folder().join("config.json")
+    /// Returns the path to the configuration file within the plugin's data folder.
+    fn path(context: Context) -> PathBuf {
+        context.get_data_folder().join("config.json")
     }
 
+    /// Reads and deserializes the configuration from `path`.
+    ///
+    /// # Errors
+    /// Returns [`io::ErrorKind::NotFound`] if the file does not exist, or
+    /// [`io::ErrorKind::InvalidData`] if deserialization fails.
     fn load(path: &Path) -> Result<ConfigManager, io::Error> {
         if !path.exists() {
             return Err(io::Error::new(
@@ -66,15 +55,10 @@ impl ConfigManager {
         Ok(config)
     }
 
-    /// Saves the current object to the specified file path in a JSON format.
+    /// Serializes and writes the configuration to `path`, creating parent directories if needed.
     ///
-    /// # Parameters
-    /// - `path`: A reference to a [`Path`] where the object should be saved.
-    ///
-    /// # Returns
-    /// - `Result<(), io::Error>`:
-    ///     - `Ok(())` if the object is successfully saved.
-    ///     - An `io::Error` if an error occurs during the serialization or file operations.
+    /// # Errors
+    /// Returns an [`io::Error`] if serialization or any file operation fails.
     fn save(&self, path: &Path) -> Result<(), io::Error> {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
