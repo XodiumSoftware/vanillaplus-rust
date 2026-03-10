@@ -20,8 +20,19 @@ impl Module for Player {
 
     fn events(&self, context: &Context) {
         context
-            .register_event_handler(Player::default(), EventPriority::Highest, true)
+            .register_event_handler::<PlayerJoinEventData, _>(
+                Player::default(),
+                EventPriority::Highest,
+                true,
+            )
             .expect("failed to register player join event handler");
+        context
+            .register_event_handler::<PlayerLeaveEventData, _>(
+                Player::default(),
+                EventPriority::Highest,
+                true,
+            )
+            .expect("failed to register player leave event handler");
     }
 }
 
