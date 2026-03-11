@@ -1,4 +1,4 @@
-name: Xodium CI/CD - Build Application
+name: Xodium CI/CD - Build | Test | Release
 
 on:
   push:
