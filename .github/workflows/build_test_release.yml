@@ -118,7 +118,7 @@ jobs:
 
       - id: create_release
         name: Create Release
-        uses: softprops/action-gh-release@37819cb191890d306d21cfb5ac4e7a358f0a6e4f
+        uses: softprops/action-gh-release@11f917660b31d6d56980ea3261f210556a812bd0
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
