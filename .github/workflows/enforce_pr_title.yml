@@ -15,6 +15,7 @@ permissions:
 jobs:
   enforce-title:
     runs-on: ubuntu-latest
+    if: github.actor != 'renovate[bot]'
     steps:
       - id: enforce_title
         name: Set PR title to branch name
