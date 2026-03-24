@@ -13,10 +13,6 @@ impl Module for Motd {
     fn enabled(&self) -> bool {
         self.config.enabled
     }
-
-    fn init(&self, server: &mut Server) {
-        self.motd(server)
-    }
 }
 
 impl Motd {

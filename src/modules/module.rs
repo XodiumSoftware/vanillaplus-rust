@@ -1,5 +1,5 @@
+use pumpkin_plugin_api::Context;
 use pumpkin_plugin_api::command::Command;
-use pumpkin_plugin_api::{Context, Server};
 use std::collections::HashSet;
 
 /// A trait representing a plugin module that can be enabled or disabled.
@@ -26,12 +26,6 @@ pub trait Module {
     fn perms(&self) -> HashSet<String> {
         HashSet::new()
     }
-
-    /// Called once during plugin load to perform module-specific initialization.
-    ///
-    /// Override this for setup logic that runs outside of event or command
-    /// registration, such as applying server-wide settings. No-op by default.
-    fn init(&self, _server: &mut Server) {}
 
     /// Registers event handlers for this module.
     ///
