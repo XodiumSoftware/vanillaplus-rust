@@ -92,7 +92,7 @@ jobs:
       - id: run_tests
         name: Run Tests
         run: |
-          cargo test --all --no-fail-fast
+          cargo test --all --no-fail-fast --no-run
           cargo clippy --all-targets --all-features -- -D warnings
           cargo fmt --all -- --check
         shell: bash
