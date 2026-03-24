@@ -121,4 +121,4 @@ jobs:
           generate_release_notes: true
           prerelease: ${{ contains(github.event.head_commit.message, '.pre') }}
           tag_name: v${{ needs.build.outputs.VERSION }}
-          files: ${{ needs.build.outputs.NAME }}-wasm32-wasip2/${{ needs.build.outputs.NAME }}.wasm
+          files: ${{ needs.build.outputs.NAME }}.wasm
