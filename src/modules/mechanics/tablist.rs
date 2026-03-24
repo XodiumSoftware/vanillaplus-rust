@@ -1,11 +1,11 @@
 use crate::module::Module;
 use serde::{Deserialize, Serialize};
 
-const MIN_TPS: f64 = 0.0;
-const MAX_TPS: f64 = 20.0;
-const TPS_DECIMAL_FORMAT: &str = "%.1f";
-const MAX_COLOR_VALUE: u8 = 255;
-const COLOR_FORMAT: &str = "#%02X%02X%02X";
+// const MIN_TPS: f64 = 0.0;
+// const MAX_TPS: f64 = 20.0;
+// const TPS_DECIMAL_FORMAT: &str = "%.1f";
+// const MAX_COLOR_VALUE: u8 = 255;
+// const COLOR_FORMAT: &str = "#%02X%02X%02X";
 
 /// Handles tab-list mechanics, including custom messages.
 #[derive(Default)]

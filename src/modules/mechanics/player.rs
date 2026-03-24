@@ -43,6 +43,9 @@ impl EventHandler<PlayerJoinEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerJoinEvent>,
     ) -> EventData<PlayerJoinEvent> {
+        if self.config.join_msg.is_empty() {
+            return event;
+        }
         event.join_message = TextComponent::text(
             self.config
                 .join_msg
@@ -59,6 +62,9 @@ impl EventHandler<PlayerLeaveEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerLeaveEvent>,
     ) -> EventData<PlayerLeaveEvent> {
+        if self.config.leave_msg.is_empty() {
+            return event;
+        }
         event.leave_message = TextComponent::text(
             self.config
                 .leave_msg
@@ -70,7 +76,7 @@ impl EventHandler<PlayerLeaveEvent> for Player {
 }
 
 /// Configuration for the player mechanics module.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Config {
     /// Whether this module is active.
     pub enabled: bool,
@@ -78,14 +84,4 @@ pub struct Config {
     pub join_msg: String,
     /// Message broadcast when a player leaves. Use `{player}` as a placeholder for the player identifier.
     pub leave_msg: String,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            join_msg: "<green>➕<reset> <gradient:#FFE259:#FFA751>›</gradient> {player}!".into(),
-            leave_msg: "<red>➖<reset> <gradient:#FFE259:#FFA751>›</gradient> {player}!".into(),
-        }
-    }
 }
