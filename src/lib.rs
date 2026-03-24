@@ -25,6 +25,7 @@ pub const PLUGIN_ID: &str = "pumpkinplus";
 /// IllyriaPlus plugin implementation.
 pub struct PumpkinPlus {}
 
+#[allow(dead_code)]
 impl PumpkinPlus {
     fn new() -> Self {
         PumpkinPlus {}
