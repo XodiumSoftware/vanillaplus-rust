@@ -17,16 +17,15 @@ pub use modules::*;
 use crate::module::Module;
 use crate::motd::Motd;
 use crate::player::Player;
-use pumpkin_plugin_api::{Context, PluginMetadata};
+use pumpkin_plugin_api::{Context, Plugin, PluginMetadata};
 use tracing::info;
 
 pub const PLUGIN_ID: &str = "pumpkinplus";
 
-/// IllyriaPlus plugin implementation.
+/// PumpkinPlus plugin implementation.
 pub struct PumpkinPlus {}
 
-#[allow(dead_code)]
-impl PumpkinPlus {
+impl Plugin for PumpkinPlus {
     fn new() -> Self {
         PumpkinPlus {}
     }
@@ -52,3 +51,5 @@ impl PumpkinPlus {
         Ok(())
     }
 }
+
+pumpkin_plugin_api::register_plugin!(PumpkinPlus);
