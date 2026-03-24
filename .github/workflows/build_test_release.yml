@@ -14,9 +14,6 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
-env:
-  APP_NAME: illyriaplus
-
 jobs:
   build:
     name: Build
@@ -24,7 +21,9 @@ jobs:
     environment:
       name: "${{ github.ref_name }}"
       url: "${{ steps.upload_artifact.outputs.artifact-url }}"
-    outputs: { VERSION: "${{ steps.get_version.outputs.VERSION }}" }
+    outputs:
+      VERSION: "${{ steps.get_version.outputs.VERSION }}"
+      NAME: "${{ steps.get_name.outputs.NAME }}"
     steps:
       - id: checkout
         name: Checkout
@@ -46,11 +45,15 @@ jobs:
         with:
           toolchain: stable
           target: wasm32-wasip2
-          components: rustfmt, clippy
 
       - id: build_artifact
         name: Build Artefact
         run: cargo build --release --target wasm32-wasip2 --timings
+        shell: bash
+
+      - id: get_name
+        name: Get Name
+        run: echo "NAME=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].name')" >> $GITHUB_OUTPUT
         shell: bash
 
       - id: get_version
@@ -63,8 +66,8 @@ jobs:
         name: Upload Artifact
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: ${{ env.APP_NAME }}-wasm32-wasip2
-          path: target/wasm32-wasip2/release/${{ env.APP_NAME }}.wasm
+          name: ${{ steps.get_name.outputs.NAME }}-wasm32-wasip2
+          path: target/wasm32-wasip2/release/${{ steps.get_name.outputs.NAME }}.wasm
           retention-days: 7
 
   test:
@@ -83,6 +86,8 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@d197c158264056996cfba74a9c2d93886346edc3
         with:
           toolchain: stable
+          target: wasm32-wasip2
+          components: rustfmt, clippy
 
       - id: run_tests
         name: Run Tests
@@ -114,4 +119,4 @@ jobs:
           generate_release_notes: true
           prerelease: ${{ contains(github.event.head_commit.message, '.pre') }}
           tag_name: v${{ needs.build.outputs.VERSION }}
-          files: ${{ env.APP_NAME }}-wasm32-wasip2/${{ env.APP_NAME }}.wasm
+          files: ${{ needs.build.outputs.NAME }}-wasm32-wasip2/${{ needs.build.outputs.NAME }}.wasm
