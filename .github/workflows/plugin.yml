@@ -1,9 +1,8 @@
-name: Xodium CI/CD - Build | Test | Nightly Release
+name: Xodium CI/CD - Lint | Build | Test | Nightly Release
 
 on:
   push:
     branches: [ main ]
-    paths: [ "src/**" ]
   workflow_dispatch:
 
 permissions:
@@ -15,8 +14,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - id: setup_rust
+        name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@d197c158264056996cfba74a9c2d93886346edc3
+        with:
+          toolchain: stable
+          target: wasm32-wasip2
+          components: rustfmt, clippy
+
+      - id: run_lint
+        name: Run Lint
+        run: |
+          cargo clippy --all-targets --all-features -- -D warnings
+          cargo fmt --all -- --check
+        shell: bash
+
   build:
     name: Build
+    needs: [ lint ]
     runs-on: ubuntu-latest
     environment:
       name: "${{ github.ref_name }}"
@@ -87,14 +110,10 @@ jobs:
         with:
           toolchain: stable
           target: wasm32-wasip2
-          components: rustfmt, clippy
 
       - id: run_tests
         name: Run Tests
-        run: |
-          cargo test --all --no-fail-fast --no-run
-          cargo clippy --all-targets --all-features -- -D warnings
-          cargo fmt --all -- --check
+        run: cargo test --all --no-fail-fast --no-run
         shell: bash
 
   nightly_release:
@@ -103,7 +122,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - id: checkout
         name: Checkout
