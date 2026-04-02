@@ -1,0 +1,58 @@
+name: Xodium CI/CD - Docs
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "requirements-docs.txt"
+  workflow_dispatch:
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - id: setup-python
+        name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - id: install-deps
+        name: Install dependencies
+        run: pip install -r requirements-docs.txt
+
+      - id: build
+        name: Build docs
+        run: mkdocs build
+
+      - id: upload-artifact
+        name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site/
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - id: deployment
+        name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v5
