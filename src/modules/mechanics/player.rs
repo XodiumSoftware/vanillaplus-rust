@@ -54,7 +54,7 @@ impl EventHandler<PlayerJoinEvent> for Player {
         event.join_message = TextComponent::text(
             self.config
                 .join_msg
-                .replace("{player}", &event.player.get_name())
+                .replace("{player}", &event.player.get_name().unwrap_or_default())
                 .as_str(),
         );
         event
@@ -73,7 +73,7 @@ impl EventHandler<PlayerLeaveEvent> for Player {
         event.leave_message = TextComponent::text(
             self.config
                 .leave_msg
-                .replace("{player}", &event.player.get_name())
+                .replace("{player}", &event.player.get_name().unwrap_or_default())
                 .as_str(),
         );
         event
@@ -92,7 +92,7 @@ impl EventHandler<PlayerLoginEvent> for Player {
         event.kick_message = TextComponent::text(
             self.config
                 .kick_msg
-                .replace("{player}", &event.player.get_name())
+                .replace("{player}", &event.player.get_name().unwrap_or_default())
                 .as_str(),
         );
         event
