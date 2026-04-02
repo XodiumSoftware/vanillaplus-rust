@@ -1,4 +1,4 @@
-name: Xodium CI/CD - Lint | Build | Test | Nightly Release
+name: Xodium CI/CD - Plugin
 
 on:
   push:
