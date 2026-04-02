@@ -32,7 +32,8 @@ impl ConfigManager {
 
     /// Returns the path to the configuration file within the plugin's data folder.
     fn path(context: &Context) -> PathBuf {
-        PathBuf::from(context.get_data_folder()).join("config.json")
+        let data_folder = context.get_data_folder().replace('\\', "/");
+        PathBuf::from(data_folder).join("config.json")
     }
 
     /// Reads and deserializes the configuration from `path`.
@@ -60,10 +61,6 @@ impl ConfigManager {
     /// # Errors
     /// Returns an [`io::Error`] if serialization or any file operation fails.
     fn save(&self, path: &Path) -> Result<(), io::Error> {
-        if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent)?;
-        }
-
         let content = serde_json::to_string_pretty(self)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 

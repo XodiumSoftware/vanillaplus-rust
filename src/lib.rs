@@ -31,7 +31,7 @@ impl Plugin for PumpkinPlus {
 
     fn metadata(&self) -> PluginMetadata {
         PluginMetadata {
-            name: "Pumpkin+".into(),
+            name: "pumpkinplus".into(),
             version: env!("CARGO_PKG_VERSION").into(),
             authors: vec!["Xodium".into()],
             description: "Minecraft Pumpkin plugin that enhances the base gameplay".into(),
