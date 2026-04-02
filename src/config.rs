@@ -55,7 +55,7 @@ impl ConfigManager {
         Ok(config)
     }
 
-    /// Serializes and writes the configuration to `path`, creating parent directories if needed.
+    /// Serializes and writes the configuration to `path`.
     ///
     /// # Errors
     /// Returns an [`io::Error`] if serialization or any file operation fails.
