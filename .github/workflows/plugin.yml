@@ -17,6 +17,8 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    environment:
+      name: "${{ github.ref_name }}"
     steps:
       - id: checkout
         name: Checkout
@@ -120,6 +122,8 @@ jobs:
     name: Nightly Release
     needs: [ test ]
     runs-on: ubuntu-latest
+    environment:
+      name: "${{ github.ref_name }}"
     permissions:
       contents: write
     steps:
