@@ -15,7 +15,6 @@ pub use mechanics::*;
 pub use modules::*;
 
 use crate::module::Module;
-use crate::motd::Motd;
 use crate::player::Player;
 use pumpkin_plugin_api::{Context, Plugin, PluginMetadata};
 use tracing::info;
