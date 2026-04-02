@@ -119,9 +119,16 @@ jobs:
       - id: update_nightly_tag
         name: Update Nightly Tag
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag --force nightly && git push --force origin tag nightly
+          gh api repos/${{ github.repository }}/git/refs/tags/nightly \
+            --method PATCH \
+            --field sha=${{ github.sha }} \
+            --field force=true 2>/dev/null || \
+          gh api repos/${{ github.repository }}/git/refs \
+            --method POST \
+            --field ref=refs/tags/nightly \
+            --field sha=${{ github.sha }}
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - id: create_nightly_release
         name: Create Nightly Release
