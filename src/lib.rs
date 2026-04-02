@@ -34,7 +34,7 @@ impl Plugin for PumpkinPlus {
             name: "Pumpkin+".into(),
             version: env!("CARGO_PKG_VERSION").into(),
             authors: vec!["Xodium".into()],
-            description: "Minecraft plugin that enhances the base gameplay in Rust".into(),
+            description: "Minecraft Pumpkin plugin that enhances the base gameplay".into(),
         }
     }
 
