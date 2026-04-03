@@ -39,7 +39,7 @@ impl Plugin for PumpkinPlus {
     }
 
     fn on_load(&mut self, context: Context) -> pumpkin_plugin_api::Result<()> {
-        ConfigManager::new(&context).map_err(|e| e.to_string())?;
+        ConfigManager::new(&context);
         Player::default().register(&context);
         info!("Pumpkin+ loaded. NICE TO CYA!");
         Ok(())

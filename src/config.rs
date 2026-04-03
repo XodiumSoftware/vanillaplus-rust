@@ -1,8 +1,10 @@
 use crate::player::Config;
 use pumpkin_plugin_api::Context;
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
-use std::{fs, io};
+use std::fs::{self, OpenOptions};
+use std::io::Write as _;
+use std::path::PathBuf;
+use tracing::error;
 
 /// Manages plugin configuration, loading from and saving to disk.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -12,58 +14,57 @@ pub struct ConfigManager {
 }
 
 impl ConfigManager {
-    /// Loads the configuration from disk, or writes and returns the default if not found.
-    ///
-    /// # Errors
-    /// Returns an [`io::Error`] if an I/O or deserialization error occurs.
-    pub fn new(context: &Context) -> Result<Self, io::Error> {
+    /// Creates a new [`ConfigManager`], writing the default config if none exists, then loading from disk.
+    pub fn new(context: &Context) -> Self {
+        let mut manager = Self::default();
+        manager.write(context);
+        manager.read_and_update(context);
+        manager
+    }
+
+    /// Reads and deserializes the configuration from disk.
+    fn read(&self, context: &Context) -> Result<ConfigManager, String> {
+        match fs::read_to_string(Self::path(context)) {
+            Ok(content) => match serde_json::from_str::<ConfigManager>(&content) {
+                Ok(data) => Ok(data),
+                Err(err) => Err(err.to_string()),
+            },
+            Err(err) => Err(err.to_string()),
+        }
+    }
+
+    /// Reads the configuration from disk and updates the current instance in place.
+    fn read_and_update(&mut self, context: &Context) {
+        match self.read(context) {
+            Ok(data) => *self = data,
+            Err(err) => error!("{}", err),
+        }
+    }
+
+    /// Serializes and writes the configuration to disk, creating the directory if needed.
+    fn write(&self, context: &Context) {
         let path = Self::path(context);
 
-        match Self::load(&path) {
-            Ok(config) => Ok(config),
-            Err(e) if e.kind() == io::ErrorKind::NotFound => {
-                let default_config = ConfigManager::default();
-                default_config.save(&path)?;
-                Ok(default_config)
-            }
-            Err(e) => Err(e),
+        match OpenOptions::new()
+            .create(true)
+            .write(true)
+            .truncate(true)
+            .open(&path)
+        {
+            Ok(mut file) => match serde_json::to_string_pretty(self) {
+                Ok(json) => {
+                    if let Err(err) = file.write_all(json.as_bytes()) {
+                        error!("{}", err);
+                    }
+                }
+                Err(err) => error!("{}", err),
+            },
+            Err(err) => error!("{}", err),
         }
     }
 
     /// Returns the path to the configuration file within the plugin's data folder.
     fn path(context: &Context) -> PathBuf {
-        PathBuf::from(context.get_data_folder()).join("config.json")
-    }
-
-    /// Reads and deserializes the configuration from `path`.
-    ///
-    /// # Errors
-    /// Returns [`io::ErrorKind::NotFound`] if the file does not exist, or
-    /// [`io::ErrorKind::InvalidData`] if deserialization fails.
-    fn load(path: &Path) -> Result<ConfigManager, io::Error> {
-        if !path.exists() {
-            return Err(io::Error::new(
-                io::ErrorKind::NotFound,
-                format!("Config file not found at: {}", path.display()),
-            ));
-        }
-
-        let content = fs::read_to_string(path)?;
-        let config: ConfigManager = serde_json::from_str(&content)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-
-        Ok(config)
-    }
-
-    /// Serializes and writes the configuration to `path`.
-    ///
-    /// # Errors
-    /// Returns an [`io::Error`] if serialization or any file operation fails.
-    fn save(&self, path: &Path) -> Result<(), io::Error> {
-        let content = serde_json::to_string_pretty(self)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-
-        fs::write(path, content)?;
-        Ok(())
+        PathBuf::from(context.get_data_folder().trim_start_matches("./")).join("config.json")
     }
 }
