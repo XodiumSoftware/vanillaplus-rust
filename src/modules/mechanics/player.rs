@@ -1,3 +1,4 @@
+use crate::config::ConfigManager;
 use crate::modules::module::Module;
 use pumpkin_plugin_api::events::{
     EventData, EventHandler, EventPriority, PlayerChatEvent, PlayerJoinEvent, PlayerLeaveEvent,
@@ -8,14 +9,13 @@ use serde::{Deserialize, Serialize};
 
 /// Handles player join and leave mechanics, including custom messages.
 #[derive(Default)]
-pub struct Player {
-    /// Configuration for this module.
-    config: Config,
-}
+pub struct Player {}
 
 impl Module for Player {
     fn enabled(&self) -> bool {
-        self.config.enabled
+        ConfigManager::get()
+            .map(|cm| cm.player_module.enabled)
+            .unwrap_or(true)
     }
 
     fn events(&self, context: &Context) {
@@ -56,7 +56,10 @@ impl EventHandler<PlayerJoinEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerJoinEvent>,
     ) -> EventData<PlayerJoinEvent> {
-        if self.config.join_msg.is_empty() {
+        let config = ConfigManager::get()
+            .map(|cm| cm.player_module)
+            .unwrap_or_default();
+        if config.join_msg.is_empty() {
             return event;
         }
         let name = event
@@ -65,7 +68,7 @@ impl EventHandler<PlayerJoinEvent> for Player {
             .map(|t| t.get_text())
             .unwrap_or_default();
         event.join_message =
-            TextComponent::text(self.config.join_msg.replace("{player}", &name).as_str());
+            TextComponent::text(config.join_msg.replace("{player}", &name).as_str());
         event
     }
 }
@@ -76,7 +79,10 @@ impl EventHandler<PlayerLeaveEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerLeaveEvent>,
     ) -> EventData<PlayerLeaveEvent> {
-        if self.config.leave_msg.is_empty() {
+        let config = ConfigManager::get()
+            .map(|cm| cm.player_module)
+            .unwrap_or_default();
+        if config.leave_msg.is_empty() {
             return event;
         }
         let name = event
@@ -85,7 +91,7 @@ impl EventHandler<PlayerLeaveEvent> for Player {
             .map(|t| t.get_text())
             .unwrap_or_default();
         event.leave_message =
-            TextComponent::text(self.config.leave_msg.replace("{player}", &name).as_str());
+            TextComponent::text(config.leave_msg.replace("{player}", &name).as_str());
         event
     }
 }
@@ -96,7 +102,10 @@ impl EventHandler<PlayerLoginEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerLoginEvent>,
     ) -> EventData<PlayerLoginEvent> {
-        if self.config.kick_msg.is_empty() {
+        let config = ConfigManager::get()
+            .map(|cm| cm.player_module)
+            .unwrap_or_default();
+        if config.kick_msg.is_empty() {
             return event;
         }
         let name = event
@@ -105,7 +114,7 @@ impl EventHandler<PlayerLoginEvent> for Player {
             .map(|t| t.get_text())
             .unwrap_or_default();
         event.kick_message =
-            TextComponent::text(self.config.kick_msg.replace("{player}", &name).as_str());
+            TextComponent::text(config.kick_msg.replace("{player}", &name).as_str());
         event
     }
 }
@@ -116,10 +125,12 @@ impl EventHandler<PlayerChatEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerChatEvent>,
     ) -> EventData<PlayerChatEvent> {
-        if !self.config.chat_filter.is_empty() {
+        let config = ConfigManager::get()
+            .map(|cm| cm.player_module)
+            .unwrap_or_default();
+        if !config.chat_filter.is_empty() {
             let lower = event.message.to_lowercase();
-            if self
-                .config
+            if config
                 .chat_filter
                 .iter()
                 .any(|word| lower.contains(word.as_str()))
@@ -128,15 +139,14 @@ impl EventHandler<PlayerChatEvent> for Player {
                 return event;
             }
         }
-        if !self.config.chat_format.is_empty() {
+        if !config.chat_format.is_empty() {
             let name = event
                 .player
                 .get_display_name()
                 .map(|t| t.get_text())
                 .unwrap_or_default();
             let original = event.message.clone();
-            event.message = self
-                .config
+            event.message = config
                 .chat_format
                 .replace("{player}", &name)
                 .replace("{message}", &original);

@@ -1,3 +1,4 @@
+use crate::config::ConfigManager;
 use crate::module::Module;
 use serde::{Deserialize, Serialize};
 
@@ -9,14 +10,13 @@ use serde::{Deserialize, Serialize};
 
 /// Handles tab-list mechanics, including custom messages.
 #[derive(Default)]
-pub struct Tablist {
-    /// Configuration for this module.
-    config: Config,
-}
+pub struct Tablist;
 
 impl Module for Tablist {
     fn enabled(&self) -> bool {
-        self.config.enabled
+        ConfigManager::get()
+            .map(|cm| cm.tablist_module.enabled)
+            .unwrap_or(true)
     }
 }
 

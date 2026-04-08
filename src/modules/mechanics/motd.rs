@@ -1,27 +1,30 @@
+use crate::config::ConfigManager;
 use crate::modules::module::Module;
 use pumpkin_plugin_api::Server;
 use serde::{Deserialize, Serialize};
 
 /// Handles MOTD (Message of the Day) mechanics.
 #[derive(Default)]
-pub struct Motd {
-    /// Configuration for this module.
-    config: Config,
-}
+pub struct Motd;
 
 impl Module for Motd {
     fn enabled(&self) -> bool {
-        self.config.enabled
+        ConfigManager::get()
+            .map(|cm| cm.motd_module.enabled)
+            .unwrap_or(true)
     }
 }
 
 impl Motd {
     pub fn motd(&self, _server: &mut Server) {
-        if !self.enabled() || self.config.motd.is_empty() {
+        let config = ConfigManager::get()
+            .map(|cm| cm.motd_module)
+            .unwrap_or_default();
+        if !self.enabled() || config.motd.is_empty() {
             return;
         }
         todo!("api is not ready yet")
-        //server.set_motd(self.config.motd.join("\n"));
+        //server.set_motd(config.motd.join("\n"));
     }
 }
 

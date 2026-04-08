@@ -1,4 +1,4 @@
-use crate::{PLUGIN_ID, module::Module};
+use crate::{PLUGIN_ID, config::ConfigManager, module::Module};
 use pumpkin_plugin_api::{
     Server,
     command::{Command, CommandError, CommandNode, CommandSender, ConsumedArgs},
@@ -10,14 +10,13 @@ use std::collections::HashSet;
 
 /// Handles locator bar mechanics.
 #[derive(Default)]
-pub struct Locator {
-    /// Configuration for this module.
-    config: Config,
-}
+pub struct Locator;
 
 impl Module for Locator {
     fn enabled(&self) -> bool {
-        self.config.enabled
+        ConfigManager::get()
+            .map(|cm| cm.locator_module.enabled)
+            .unwrap_or(true)
     }
 
     fn cmds(&self) -> Vec<Command> {
