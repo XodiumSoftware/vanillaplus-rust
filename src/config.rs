@@ -100,7 +100,7 @@ impl ConfigManager {
                     match a_map.remove(&key) {
                         Some(a_val) => {
                             // Key exists in both: recursively merge
-                            if let Some(merged) = Self::merge_values(a_val, b_val) {
+                            if let Some(merged) = Self::merge_values(a_val, b_val.clone()) {
                                 a_map.insert(key, merged);
                             } else {
                                 // Incompatible types: use b's value
