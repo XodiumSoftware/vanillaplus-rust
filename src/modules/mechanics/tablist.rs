@@ -1,5 +1,6 @@
 use crate::config::ConfigManager;
 use crate::module::Module;
+use crate::module_names;
 use serde::{Deserialize, Serialize};
 
 // const MIN_TPS: f64 = 0.0;
@@ -15,7 +16,7 @@ pub struct Tablist;
 impl Module for Tablist {
     fn enabled(&self) -> bool {
         ConfigManager::get()
-            .map(|cm| cm.tablist_module.enabled)
+            .map(|cm| cm.get_config::<Config>(module_names::TABLIST).enabled)
             .unwrap_or(true)
     }
 }

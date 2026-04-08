@@ -1,5 +1,6 @@
 use crate::config::ConfigManager;
-use crate::modules::module::Module;
+use crate::module::Module;
+use crate::module_names;
 use pumpkin_plugin_api::events::{
     EventData, EventHandler, EventPriority, PlayerChatEvent, PlayerJoinEvent, PlayerLeaveEvent,
     PlayerLoginEvent,
@@ -14,7 +15,7 @@ pub struct Player {}
 impl Module for Player {
     fn enabled(&self) -> bool {
         ConfigManager::get()
-            .map(|cm| cm.player_module.enabled)
+            .map(|cm| cm.get_config::<Config>(module_names::PLAYER).enabled)
             .unwrap_or(true)
     }
 
@@ -56,8 +57,8 @@ impl EventHandler<PlayerJoinEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerJoinEvent>,
     ) -> EventData<PlayerJoinEvent> {
-        let config = ConfigManager::get()
-            .map(|cm| cm.player_module)
+        let config: Config = ConfigManager::get()
+            .map(|cm| cm.get_config(module_names::PLAYER))
             .unwrap_or_default();
         if config.join_msg.is_empty() {
             return event;
@@ -79,8 +80,8 @@ impl EventHandler<PlayerLeaveEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerLeaveEvent>,
     ) -> EventData<PlayerLeaveEvent> {
-        let config = ConfigManager::get()
-            .map(|cm| cm.player_module)
+        let config: Config = ConfigManager::get()
+            .map(|cm| cm.get_config(module_names::PLAYER))
             .unwrap_or_default();
         if config.leave_msg.is_empty() {
             return event;
@@ -102,8 +103,8 @@ impl EventHandler<PlayerLoginEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerLoginEvent>,
     ) -> EventData<PlayerLoginEvent> {
-        let config = ConfigManager::get()
-            .map(|cm| cm.player_module)
+        let config: Config = ConfigManager::get()
+            .map(|cm| cm.get_config(module_names::PLAYER))
             .unwrap_or_default();
         if config.kick_msg.is_empty() {
             return event;
@@ -125,8 +126,8 @@ impl EventHandler<PlayerChatEvent> for Player {
         _server: Server,
         mut event: EventData<PlayerChatEvent>,
     ) -> EventData<PlayerChatEvent> {
-        let config = ConfigManager::get()
-            .map(|cm| cm.player_module)
+        let config: Config = ConfigManager::get()
+            .map(|cm| cm.get_config(module_names::PLAYER))
             .unwrap_or_default();
         if !config.chat_filter.is_empty() {
             let lower = event.message.to_lowercase();
