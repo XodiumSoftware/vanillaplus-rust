@@ -18,9 +18,13 @@ pub use modules::mechanics::motd::Config as MotdConfig;
 pub use modules::mechanics::player::Config as PlayerConfig;
 pub use modules::mechanics::tablist::Config as TablistConfig;
 
+use crate::mechanics::locator::Locator;
+use crate::mechanics::motd::Motd;
 use crate::mechanics::player::Player;
+use crate::mechanics::tablist::Tablist;
 use crate::module::Module;
 use pumpkin_plugin_api::{Context, Plugin, PluginMetadata};
+use std::time::Instant;
 use tracing::info;
 
 pub const PLUGIN_ID: &str = env!("CARGO_PKG_NAME");
@@ -63,8 +67,24 @@ impl Plugin for PumpkinPlus {
 
         manager.finalize(&context);
 
-        Player::default().register(&context);
+        let player = Player::default();
+        let tablist = Tablist::default();
+        let motd = Motd::default();
+        let locator = Locator::default();
+        let modules: Vec<&dyn Module> = vec![&player, &tablist, &motd, &locator];
+        let enabled_count = modules.iter().filter(|m| m.enabled()).count();
 
+        let mut total_ms = 0u128;
+        for module in modules {
+            let start = Instant::now();
+            module.register(&context);
+            total_ms += start.elapsed().as_millis();
+        }
+
+        info!(
+            "Registered: {} module(s) | Took {}ms",
+            enabled_count, total_ms
+        );
         info!("Pumpkin+ loaded. NICE TO CYA!");
         Ok(())
     }
