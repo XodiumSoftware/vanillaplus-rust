@@ -23,11 +23,8 @@ pub fn config_key<T>() -> String {
     if parts.len() >= 2 {
         parts[parts.len() - 2].to_string()
     } else if let Some(&last) = parts.last() {
-        if last.ends_with("Config") {
-            last[..last.len() - 6].to_string()
-        } else {
-            last.to_string()
-        }
+        last.strip_suffix("Config")
+            .map_or_else(|| last.to_string(), |s| s.to_string())
     } else {
         full_name.to_string()
     }

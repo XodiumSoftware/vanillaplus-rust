@@ -59,10 +59,10 @@ impl Plugin for PumpkinPlus {
 
         manager.finalize(&context);
 
-        let player = Player::default();
-        let tablist = Tablist::default();
-        let motd = Motd::default();
-        let locator = Locator::default();
+        let player = Player {};
+        let tablist = Tablist;
+        let motd = Motd;
+        let locator = Locator;
         let modules: Vec<&dyn Module> = vec![&player, &tablist, &motd, &locator];
         let enabled_count = modules.iter().filter(|m| m.enabled()).count();
 
