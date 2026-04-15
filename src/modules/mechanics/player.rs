@@ -62,11 +62,7 @@ impl EventHandler<PlayerJoinEvent> for Player {
         if config.join_msg.is_empty() {
             return event;
         }
-        let name = event
-            .player
-            .get_display_name()
-            .map(|t| t.get_text())
-            .unwrap_or_default();
+        let name = event.player.get_display_name().get_text();
         event.join_message =
             TextComponent::text(config.join_msg.replace("{player}", &name).as_str());
         event
@@ -85,11 +81,7 @@ impl EventHandler<PlayerLeaveEvent> for Player {
         if config.leave_msg.is_empty() {
             return event;
         }
-        let name = event
-            .player
-            .get_display_name()
-            .map(|t| t.get_text())
-            .unwrap_or_default();
+        let name = event.player.get_display_name().get_text();
         event.leave_message =
             TextComponent::text(config.leave_msg.replace("{player}", &name).as_str());
         event
@@ -108,11 +100,7 @@ impl EventHandler<PlayerLoginEvent> for Player {
         if config.kick_msg.is_empty() {
             return event;
         }
-        let name = event
-            .player
-            .get_display_name()
-            .map(|t| t.get_text())
-            .unwrap_or_default();
+        let name = event.player.get_display_name().get_text();
         event.kick_message =
             TextComponent::text(config.kick_msg.replace("{player}", &name).as_str());
         event
@@ -140,11 +128,7 @@ impl EventHandler<PlayerChatEvent> for Player {
             }
         }
         if !config.chat_format.is_empty() {
-            let name = event
-                .player
-                .get_display_name()
-                .map(|t| t.get_text())
-                .unwrap_or_default();
+            let name = event.player.get_display_name().get_text();
             let original = event.message.clone();
             event.message = config
                 .chat_format
