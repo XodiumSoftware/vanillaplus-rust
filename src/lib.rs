@@ -46,6 +46,7 @@ impl Plugin for PumpkinPlus {
                 .map(Into::into)
                 .collect(),
             description: env!("CARGO_PKG_DESCRIPTION").into(),
+            dependencies: vec![],
         }
     }
 
