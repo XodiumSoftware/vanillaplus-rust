@@ -37,10 +37,11 @@ jobs:
         name: Build docs
         run: cargo doc --no-deps --target wasm32-wasip2
 
-      - id: create-index
-        name: Create root index.html
+      - id: flatten-docs
+        name: Flatten docs to root
         run: |
-          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=pumpkinplus/index.html"></head><body>Redirecting to <a href="pumpkinplus/index.html">pumpkinplus</a>...</body></html>' > target/wasm32-wasip2/doc/index.html
+          cp -r target/wasm32-wasip2/doc/pumpkinplus/* target/wasm32-wasip2/doc/
+          rm -rf target/wasm32-wasip2/doc/pumpkinplus
 
       - id: upload-artifact
         name: Upload Pages artifact
