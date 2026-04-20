@@ -7,8 +7,7 @@ PumpkinPlus is built around independent modules. Each module is controlled by an
 | Module                | Summary                               | Commands   | Status |
 |-----------------------|---------------------------------------|------------|--------|
 | [Player](player.md)   | Custom join, leave, and kick messages | —          | Active |
-| [MOTD](motd.md)       | Custom server list MOTD               | —          | Stub   |
-| [Tablist](tablist.md) | Custom tab-list header/footer         | —          | Stub   |
+| [Tablist](tablist.md) | Custom tab-list header/footer         | —          | Active |
 | [Locator](locator.md) | Personalise locator bar colour        | `/locator` | Stub   |
 
 ## Configuration

@@ -4,7 +4,6 @@ mod modules {
     pub mod module;
     pub mod mechanics {
         pub mod locator;
-        pub mod motd;
         pub mod player;
         pub mod tablist;
     }
@@ -14,12 +13,10 @@ pub use config::*;
 pub use modules::*;
 
 pub use modules::mechanics::locator::Config as LocatorConfig;
-pub use modules::mechanics::motd::Config as MotdConfig;
 pub use modules::mechanics::player::Config as PlayerConfig;
 pub use modules::mechanics::tablist::Config as TablistConfig;
 
 use crate::mechanics::locator::Locator;
-use crate::mechanics::motd::Motd;
 use crate::mechanics::player::Player;
 use crate::mechanics::tablist::Tablist;
 use crate::module::Module;
@@ -55,16 +52,14 @@ impl Plugin for PumpkinPlus {
 
         manager.register::<PlayerConfig>();
         manager.register::<TablistConfig>();
-        manager.register::<MotdConfig>();
         manager.register::<LocatorConfig>();
 
         manager.finalize(&context);
 
         let player = Player {};
         let tablist = Tablist;
-        let motd = Motd;
         let locator = Locator;
-        let modules: Vec<&dyn Module> = vec![&player, &tablist, &motd, &locator];
+        let modules: Vec<&dyn Module> = vec![&player, &tablist, &locator];
         let enabled_count = modules.iter().filter(|m| m.enabled()).count();
 
         let mut total_ms = 0u128;
