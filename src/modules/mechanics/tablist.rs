@@ -1,6 +1,7 @@
 use crate::config::ConfigManager;
 use crate::module::Module;
 use pumpkin_plugin_api::events::{EventData, EventHandler, EventPriority, PlayerJoinEvent};
+use pumpkin_plugin_api::text::TextComponent;
 use pumpkin_plugin_api::{Context, Server};
 use serde::{Deserialize, Serialize};
 
@@ -36,17 +37,9 @@ impl EventHandler<PlayerJoinEvent> for Tablist {
             return event;
         }
 
-        // Set tablist header if configured
-        if !config.header.is_empty() {
-            // TODO: Replace with actual API call when available
-            // event.player.set_tablist_header(Some(TextComponent::text(&config.header)));
-        }
-
-        // Set tablist footer if configured
-        if !config.footer.is_empty() {
-            // TODO: Replace with actual API call when available
-            // event.player.set_tablist_footer(Some(TextComponent::text(&config.footer)));
-        }
+        let header = TextComponent::text(&config.header);
+        let footer = TextComponent::text(&config.footer);
+        event.player.set_tab_list_header_footer(header, footer);
 
         event
     }
