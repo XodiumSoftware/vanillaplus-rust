@@ -17,7 +17,7 @@
 | **Core API**      | [pumpkin-plugin-api](https://github.com/Pumpkin-MC/Pumpkin) | Minecraft server plugin API      |
 | **Language**      | Rust 2024                                                   | Systems language                 |
 | **Build Tool**    | Cargo                                                       | Build automation                 |
-| **Serialization** | serde + serde_json                                          | Config serialization             |
+| **Serialization** | serde + toml                                                | Config serialization             |
 | **Config**        | figment                                                     | TOML config with merge semantics |
 | **Logging**       | tracing                                                     | Structured logging               |
 | **Docs**          | rustdoc (via `cargo doc`)                                   | API documentation                |

@@ -13,11 +13,11 @@ use figment::providers::{Format, Toml};
 use pumpkin_plugin_api::Context;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
+use toml::Value;
 use tracing::error;
 
 /// Extracts a config key from a type's full name.
@@ -73,7 +73,8 @@ impl ConfigManager {
         self.configs
             .get(&key)
             .and_then(|v| {
-                serde_json::from_value(v.clone())
+                v.clone()
+                    .try_into()
                     .inspect_err(|e| error!("Failed to parse config for key '{}': {}", key, e))
                     .ok()
             })
@@ -85,7 +86,7 @@ impl ConfigManager {
     pub fn register<T: Serialize + Default + 'static>(&mut self) {
         let key = config_key::<T>();
         let config = T::default();
-        match serde_json::to_value(config) {
+        match Value::try_from(config) {
             Ok(value) => {
                 self.configs.insert(key, value);
             }
@@ -100,7 +101,7 @@ impl ConfigManager {
             PathBuf::from(context.get_data_folder().trim_start_matches("./")).join("config.toml");
 
         if path.exists() {
-            let file_config: HashMap<String, Value> = Figment::new()
+            let file_config: toml::Table = Figment::new()
                 .merge(Toml::file(&path))
                 .extract()
                 .inspect_err(|e| error!("Failed to load config file: {:?}", e))
@@ -109,7 +110,7 @@ impl ConfigManager {
             for (key, value) in file_config {
                 if self.configs.contains_key(&key) {
                     if let Some(existing) = self.configs.get(&key) {
-                        let merged = merge_json(existing, &value);
+                        let merged = merge_toml(existing, &value);
                         self.configs.insert(key, merged);
                     }
                 } else {
@@ -130,21 +131,21 @@ impl ConfigManager {
     }
 }
 
-/// Merge two JSON values, preferring values from `b` when both exist.
-/// For objects, recursively merges fields.
-fn merge_json(a: &Value, b: &Value) -> Value {
+/// Merge two TOML values, preferring values from `b` when both exist.
+/// For tables, recursively merges fields.
+fn merge_toml(a: &Value, b: &Value) -> Value {
     match (a, b) {
-        (Value::Object(a_map), Value::Object(b_map)) => {
+        (Value::Table(a_map), Value::Table(b_map)) => {
             let mut result = a_map.clone();
             for (key, b_val) in b_map {
                 let a_val = result.get(key);
                 let merged = match a_val {
-                    Some(a_val) => merge_json(a_val, b_val),
+                    Some(a_val) => merge_toml(a_val, b_val),
                     None => b_val.clone(),
                 };
                 result.insert(key.clone(), merged);
             }
-            Value::Object(result)
+            Value::Table(result)
         }
         _ => b.clone(),
     }

@@ -40,7 +40,7 @@ Modules are plain structs (not singletons) instantiated with `Default::default()
 
 ### Configuration
 
-**`ConfigManager`** (`src/config.rs`) is a single JSON-backed struct that aggregates all module configs. On `on_load`:
+**`ConfigManager`** (`src/config.rs`) is a single TOML-backed struct that aggregates all module configs. On `on_load`:
 
 - If `config.toml` exists in the plugin data folder, it is deserialized and returned.
 - If not found, the default config is written to disk and returned.
